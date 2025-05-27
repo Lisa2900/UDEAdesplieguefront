@@ -69,7 +69,7 @@ function MateriasGridContent() {
             try {
               const userData = JSON.parse(storedUserData)
               userArea = userData.area || userData.usuario?.area // igual que en tu otro efecto
-              console.log("Área del usuario:", userArea)
+              //console.log("Área del usuario:", userArea)  
             } catch (error) {
               console.error("Error parsing user data:", error)
             }

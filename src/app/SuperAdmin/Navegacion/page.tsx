@@ -30,8 +30,7 @@ const Navigation: React.FC = () => {
   >(null);
   const [carreras, setCarreras] = useState<Carrera[]>([]);
 
-  // ✅ Obtener áreas (carreras)
-
+  // Obtener áreas (carreras)
   useEffect(() => {
     const fetchAreas = async () => {
       try {
@@ -39,7 +38,6 @@ const Navigation: React.FC = () => {
           `${process.env.NEXT_PUBLIC_API_URL}/area/`
         );
 
-        // Normalizamos los datos para asegurarnos de que tengan `idArea`
         const areasFormateadas: Carrera[] = response.data.map(
           (area: {
             id: number;
@@ -62,10 +60,10 @@ const Navigation: React.FC = () => {
     fetchAreas();
   }, []);
 
-  // ✅ Obtener semestres al seleccionar carrera
+  // Obtener semestres al seleccionar carrera (solo si no están ya cargados)
   useEffect(() => {
     const fetchSemestres = async () => {
-      if (carrera && carrera.idArea) {
+      if (carrera && carrera.idArea && (!carrera.semestres || carrera.semestres.length === 0)) {
         try {
           const response = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}/semestre/?fkIdArea=${carrera.idArea}`
@@ -91,17 +89,13 @@ const Navigation: React.FC = () => {
         } catch (error) {
           console.error("Error al obtener semestres:", error);
         }
-      } else {
-        console.error("ID de área no válido:", carrera?.idArea);
       }
     };
 
-    if (carrera) {
-      fetchSemestres();
-    }
+    fetchSemestres();
   }, [carrera]);
 
-  // ✅ Agregar carrera
+  // Agregar carrera
   const agregarCarrera = async ({ nombreArea }: { nombreArea: string }) => {
     try {
       const response = await axios.post(
@@ -134,7 +128,7 @@ const Navigation: React.FC = () => {
     }
   };
 
-  // ✅ Agregar semestre
+  // Agregar semestre
   const agregarSemestre = async ({
     nombreSemestre,
     fkIdArea,
@@ -172,8 +166,6 @@ const Navigation: React.FC = () => {
   };
 
   const seleccionarSemestre = (s: Semestre) => {
-    console.log("Semestre seleccionado:", s);
-
     if (!s.id) {
       console.error("El semestre seleccionado no tiene un ID válido.");
       return;
@@ -181,6 +173,7 @@ const Navigation: React.FC = () => {
     setSemestre(s);
     setNivel("materias");
   };
+
   const seleccionarMateria = () => {
     router.push("/SuperAdmin/books");
   };
@@ -221,17 +214,14 @@ const Navigation: React.FC = () => {
         />
       )}
 
-      {/* console.log("Materias enviadas a ListaNavegacion:" items, semestre.materias) */}
       {nivel === "materias" && semestre && (
-        <>
-          <ListaNavegacion
-            titulo={`Materias - ${semestre.nombre}`}
-            items={semestre.materias}
-            onSelect={seleccionarMateria}
-            onBack={volverAtras}
-            onAgregar={() => setModalAbierto("materia")}
-          />
-        </>
+        <ListaNavegacion
+          titulo={`Materias - ${semestre.nombre}`}
+          items={semestre.materias}
+          onSelect={seleccionarMateria}
+          onBack={volverAtras}
+          onAgregar={() => setModalAbierto("materia")}
+        />
       )}
 
       {modalAbierto === "carrera" && (
@@ -247,11 +237,10 @@ const Navigation: React.FC = () => {
           isOpen
           onClose={() => setModalAbierto(null)}
           onAdd={agregarSemestre}
-          fkIdArea={carrera.idArea} // ✅ Pasar el ID del área
+          fkIdArea={carrera.idArea}
         />
       )}
 
-      {/* Nos quedamos aqui xd*/}
       {modalAbierto === "materia" && semestre && semestre.id && carrera && (
         <AgregaMateria
           isOpen
@@ -272,7 +261,6 @@ const Navigation: React.FC = () => {
                 nombre: response.data.nombreMateria || response.data.nombre,
               };
 
-              // Actualizar el estado del semestre y renderizar correctamente
               setSemestre((prevSemestre) => {
                 if (!prevSemestre) return prevSemestre;
                 const nuevasMaterias = [

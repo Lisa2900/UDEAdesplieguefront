@@ -1,10 +1,14 @@
 "use client";
-
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, X } from "lucide-react";
 import Image from "next/image";
+// Import PdfViewer component (adjust the path as needed)
+import dynamic from "next/dynamic";
+const PdfViewer = dynamic(() => import("./PdfViewer"), { ssr: false });
 
 interface BookDetail {
   nombreLibro: string;
@@ -14,24 +18,32 @@ interface BookDetail {
   archivoUrl: string;
 }
 
+const getUrl = (url: string) => {
+  if (!url) return "/default-image.jpg";
+  if (url.startsWith("http")) return url;
+  return `http://localhost:4000${url.startsWith("/") ? url : "/" + url}`;
+};
+
 const BookDetailSection: React.FC = () => {
   const params = useParams();
   const id = params?.id;
   const [book, setBook] = useState<BookDetail | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
     const fetchBook = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books/getBooks/${id}`);
         const data = await res.json();
 
         const cleanBook: BookDetail = {
-          nombreLibro: (data.nombreLibro || "").replaceAll('"', ''),
-          autor: (data.autor || "").replaceAll('"', ''),
-          descripcion: (data.descripcion || "").replaceAll('"', ''),
+          nombreLibro: (data.nombreLibro || "").replaceAll('"', ""),
+          autor: (data.autor || "").replaceAll('"', ""),
+          descripcion: (data.descripcion || "").replaceAll('"', ""),
           portadaUrl: data.portadaUrl || "/default-image.jpg",
           archivoUrl: data.archivoUrl || "",
         };
@@ -39,13 +51,17 @@ const BookDetailSection: React.FC = () => {
         setBook(cleanBook);
       } catch (err) {
         console.error("Error al obtener detalles del libro:", err);
+        setBook(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchBook();
   }, [id]);
 
-  if (!book) return <p className="text-center py-10">Cargando...</p>;
+  if (isLoading) return <p className="text-center py-10">Cargando...</p>;
+  if (!book) return <p className="text-center py-10">Libro no encontrado.</p>;
 
   return (
     <>
@@ -63,13 +79,12 @@ const BookDetailSection: React.FC = () => {
             className="flex-shrink-0 flex justify-center"
           >
             <Image
-              src={`http://localhost:4000${book.portadaUrl.startsWith("/") ? book.portadaUrl : "/" + book.portadaUrl}`}
+              src={getUrl(book.portadaUrl)}
               width={200}
               height={200}
               alt="Portada del libro"
               className="w-80 h-auto object-cover rounded"
             />
-
           </motion.div>
 
           <motion.div
@@ -102,37 +117,34 @@ const BookDetailSection: React.FC = () => {
 
       {/* MODAL */}
       <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center px-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-xl overflow-hidden"
-            >
-              {/* Botón de cerrar */}
-              <button
-                onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 z-50 bg-white border border-gray-300 hover:bg-red-500 hover:text-white p-2 rounded-full transition"
-              >
-                <X size={20} />
-              </button>
+  {showModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center px-4"
+    >
+      <motion.div
+        initial={{ scale: 0.9 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="relative bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-xl overflow-hidden"
+      >
+        <button
+          onClick={() => setShowModal(false)}
+          className="absolute top-4 right-4 z-50 bg-white border border-gray-300 hover:bg-red-500 hover:text-white p-2 rounded-full transition"
+        >
+          <X size={20} />
+        </button>
 
-              <iframe
-                src={`http://localhost:4000${book.archivoUrl.startsWith("/") ? book.archivoUrl : "/" + book.archivoUrl}`}
-                className="w-full h-full border-none"
-                title="PDF Viewer"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Usamos la URL firmada directamente */}
+        <PdfViewer url={getUrl(book.archivoUrl)} />
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
     </>
   );
 };

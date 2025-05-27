@@ -70,13 +70,14 @@ export default function Book() {
           transition={{ duration: 0.5, delay: index * 0.1 }}
           whileHover={{ scale: 1.08, transition: { duration: 0.15 } }}
         >
-          <Image
-  src={`http://localhost:4000${book.image.startsWith("/") ? book.image : "/" + book.image}`}
+        <Image
+  src={book.image}  // book.image es la URL completa desde GCS
   alt={book.title}
   width={200}
   height={200}
   className="w-full h-80 object-cover"
 />
+
 
 
           {hoveredBook === index && (
