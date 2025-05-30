@@ -7,9 +7,12 @@ const Footer = () => {
                 <div>
                     <h2 className="font-bold text-lg">Un suspiro es necesario...</h2>
                     <p className="text-gray-500 mt-2">
-                        400 Universidad de los ángeles <br />
-                        Tecamachalco, <br />
-                        Somos todos
+                        Universidad de los ángeles <br />
+                        Puebla, <br />
+                        Av 11 Sur 1101
+                        Col. Centro 
+                        C.p. 72000 <br />
+                        Puebla, pue.
                     </p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -17,9 +20,7 @@ const Footer = () => {
                         <h3 className="text-gray-500 font-semibold">Filtros</h3>
                         <ul className="mt-2 space-y-2">
                             <li><a href="/login" className="hover:underline">Inicio</a></li>
-                            <li><a href="#" className="hover:underline">Semestres</a></li>
-                            <li><a href="#" className="hover:underline">Saber más...</a></li>
-                            <li><a href="#" className="hover:underline">Contact</a></li>
+                            <li><a href="#" className="hover:underline">Contacto: Tel.222 246 1092</a></li>
                         </ul>
                     </div>
                     <div>

@@ -166,7 +166,7 @@ function AdminLogin() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="font-[sans-serif] min-h-screen flex items-center justify-center "
     >
-      <div className="grid md:grid-cols-2 items-center gap-0 max-w-6xl w-full mx-auto my-8 mt-[-180px] overflow-hidden rounded-2xl shadow-2xl bg-white">
+      <div className="grid md:grid-cols-2 items-center gap-0 max-w-6xl w-full mx-auto my-8 mt-[-30px] overflow-hidden rounded-2xl shadow-2xl bg-white">
         {/* Formulario */}
         <div className="w-full px-8 py-10 md:px-12">
           <div className="mb-8 flex items-center justify-between">
